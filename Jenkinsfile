@@ -20,9 +20,9 @@ pipeline {
 
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
-        string(name: 'IMAGE_NAME', defaultValue: '', description: 'Docker image name')
-        string(name: 'CONTAINER_NAME', defaultValue: '', description: 'Docker container name')
-        string(name: 'PORT_ON_DOCKER_HOST', defaultValue: '', description: 'Port on Docker host')
+        string(name: 'IMAGE_NAME', defaultValue: 'land-01', description: 'Docker image name')
+        string(name: 'CONTAINER_NAME', defaultValue: 'land-01', description: 'Docker container name')
+        string(name: 'PORT_ON_DOCKER_HOST', defaultValue: '2323', description: 'Port on Docker host')
     }
 
     stages {
