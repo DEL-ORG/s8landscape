@@ -48,7 +48,7 @@ pipeline {
                     sh """
                         echo "Checking for Dockerfile in the workspace..."
                         ls -l ${WORKSPACE}
-                        ls -l ${WORKSPACE}/path/to/dockerfile/
+                        ls -l ${WORKSPACE}/landscape/
                     """
                 }
             }
@@ -63,7 +63,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f ${WORKSPACE}/path/to/landscape.Dockerfile .
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f ${WORKSPACE}/landscape/landscape.Dockerfile ${WORKSPACE}/landscape/
                         docker images
                     """
                 }
