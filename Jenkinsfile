@@ -43,7 +43,36 @@ pipeline {
                 }
             }
         }
-
+        stage('Building Sonar Image') {
+            steps {
+                script {
+                    dir("${WORKSPACE}/sonar-scanner") {
+                        sh """
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/s8landscape:latest .
+                        docker images
+                        """
+                    }
+                }
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                script {
+                    dir("${WORKSPACE}") {
+                        docker.image("s8kevinaf02/s8landscape:latest").inside('-u 0:0') {
+                            withSonarQubeEnv('SonarScanner') {
+                                sh """
+                                    ls -l 
+                                    pwd
+                                    sonar-scanner -v
+                                    sonar-scanner
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
         stage('Building Landscape Application') {
             when {
                 expression {
@@ -53,7 +82,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} .
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f landscape.Dockerfile .
                         docker images
                     """
                 }
@@ -69,6 +98,16 @@ pipeline {
                         // Use Docker CLI to login
                         sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
                     }
+                }
+            }
+        }
+        stage('Pushing into Docker Hub') {
+            steps {
+                script {
+                    sh """
+                        docker push ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER}
+                        docker push ${env.DOCKER_HUB_USERNAME}/s8landscape:latest
+                    """
                 }
             }
         }
