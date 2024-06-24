@@ -12,7 +12,6 @@ pipeline {
     }
     environment {
         DOCKER_HUB_USERNAME = "s8kevinaf02"
-        landscape = "landscape-app-01"
         DOCKER_CREDENTIAL_ID = 's8kevinaf02-dockerhub-token'
     }
 
@@ -49,22 +48,25 @@ pipeline {
                         echo "Checking for Dockerfile in the workspace..."
                         ls -l ${WORKSPACE}
                         ls -l ${WORKSPACE}/sonar-scanner/
+                        ls -l ${WORKSPACE}/landscape/
                     """
                 }
             }
         }
+
         stage('Building Sonar Image') {
             steps {
                 script {
                     dir("${WORKSPACE}/sonar-scanner") {
                         sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/s8landscape:latest  .
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/s8landscape:latest .
                         docker images
                         """
                     }
                 }
             }
         }
+
         stage('SonarQube analysis') {
             steps {
                 script {
@@ -74,8 +76,7 @@ pipeline {
                                 sh """
                                     ls -l 
                                     pwd
-                                    sonar-scanner -v
-                                    sonar-scanner
+                                    sonar-scanner -Dsonar.projectKey=my-project-key -Dsonar.sources=.
                                 """
                             }
                         }
@@ -83,6 +84,7 @@ pipeline {
                 }
             }
         }
+
         stage('Building Landscape Application') {
             when {
                 expression {
@@ -92,7 +94,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f landscape.Dockerfile .
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f ${WORKSPACE}/landscape/landscape.Dockerfile ${WORKSPACE}/landscape/
                         docker images
                     """
                 }
@@ -134,14 +136,6 @@ pipeline {
             cleanWs()
         }
     }
-}
-
-def customFunction() {
-    sh """
-        ls -l
-        pwd
-        uptime
-    """
 }
 
 def sanity_check() {
