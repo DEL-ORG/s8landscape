@@ -5,7 +5,7 @@ pipeline {
         githubPush()
     }
     options {
-        buildDiscarder(logRotator(numToKeepStr: '7'))
+        buildDiscarder(logRotator(numToKeepStr: '5'))
         disableConcurrentBuilds()
         timestamps()
         skipDefaultCheckout()
@@ -63,7 +63,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f ${WORKSPACE}/landscape/landscape.Dockerfile ${WORKSPACE}/landscape/
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f landscape.Dockerfile .
                         docker images
                     """
                 }
