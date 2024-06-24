@@ -48,7 +48,7 @@ pipeline {
                     sh """
                         echo "Checking for Dockerfile in the workspace..."
                         ls -l ${WORKSPACE}
-                        ls -l ${WORKSPACE}/landscape/
+                        ls -l ${WORKSPACE}/sonar-scanner/
                     """
                 }
             }
