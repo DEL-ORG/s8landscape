@@ -1,16 +1,14 @@
 pipeline {
     agent any
 
-     triggers {
+    triggers {
         githubPush()
     }
     options {
-        //timeout(time: 1, unit: 'MINUTES') // Timeout for the entire pipeline
-        buildDiscarder(logRotator(numToKeepStr: '7')) // Discard old builds to save disk space
-        disableConcurrentBuilds() // Ensures that only one build can run at a time
-        timestamps() // Adds timestamps to the console output
-        skipDefaultCheckout() // Skips the default checkout of source code, useful if you're doing a custom checkout
-        //retry(3) // Automatically retries the entire pipeline up to 3 times if it fails
+        buildDiscarder(logRotator(numToKeepStr: '7'))
+        disableConcurrentBuilds()
+        timestamps()
+        skipDefaultCheckout()
     }
     environment {
         DOCKER_HUB_USERNAME = "s8kevinaf02"
@@ -43,36 +41,19 @@ pipeline {
                 }
             }
         }
-        // stage('Building Sonar Image') {
-        //     steps {
-        //         script {
-        //             dir("${WORKSPACE}/sonar-scanner") {
-        //                 sh """
-        //                 docker build -t ${env.DOCKER_HUB_USERNAME}/s8landscape:latest .
-        //                 docker images
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('SonarQube analysis') {
-        //     steps {
-        //         script {
-        //             dir("${WORKSPACE}") {
-        //                 docker.image("s8kevinaf02/s8landscape:latest").inside('-u 0:0') {
-        //                     withSonarQubeEnv('SonarScanner') {
-        //                         sh """
-        //                             ls -l 
-        //                             pwd
-        //                             sonar-scanner -v
-        //                             sonar-scanner
-        //                         """
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+
+        stage('Verify Dockerfile Presence') {
+            steps {
+                script {
+                    sh """
+                        echo "Checking for Dockerfile in the workspace..."
+                        ls -l ${WORKSPACE}
+                        ls -l ${WORKSPACE}/path/to/dockerfile/
+                    """
+                }
+            }
+        }
+
         stage('Building Landscape Application') {
             when {
                 expression {
@@ -82,25 +63,25 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f landscape.Dockerfile .
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f ${WORKSPACE}/path/to/landscape.Dockerfile .
                         docker images
                     """
                 }
             }
         }
-        stage('Login into') {
+
+        stage('Login into Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIAL_ID}", 
                     usernameVariable: 'DOCKER_USERNAME', 
                     passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Use Docker CLI to login
                         sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
                     }
                 }
             }
         }
+
         stage('Pushing into Docker Hub') {
             steps {
                 script {
