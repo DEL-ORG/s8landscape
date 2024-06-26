@@ -41,19 +41,6 @@ pipeline {
             }
         }
 
-        stage('Verify Dockerfile Presence') {
-            steps {
-                script {
-                    sh """
-                        echo "Checking for Dockerfile in the workspace..."
-                        ls -l ${WORKSPACE}
-                        ls -l ${WORKSPACE}/sonar-scanner/
-                        ls -l ${WORKSPACE}/landscape/
-                    """
-                }
-            }
-        }
-
         stage('Building Sonar Image') {
             steps {
                 script {
@@ -75,7 +62,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f ${WORKSPACE}/landscape/landscape.Dockerfile ${WORKSPACE}/landscape/
+                        docker build -t ${env.DOCKER_HUB_USERNAME}/app-01:${BUILD_NUMBER} -f landscape.Dockerfile .
                         docker images
                     """
                 }
