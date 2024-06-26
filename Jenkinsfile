@@ -53,6 +53,24 @@ pipeline {
                 }
             }
         }
+         stage('SonarQube analysis') {
+            steps {
+                script {
+                    dir("${WORKSPACE}") {
+                        docker.image("s8kevinaf02/s8landscape:latest") {
+                            withSonarQubeEnv('SonarScanner') {
+                                sh """
+                                    ls -l 
+                                    pwd
+                                    sonar-scanner -v
+                                    sonar-scanner
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
         stage('Building Landscape Application') {
             when {
                 expression {
