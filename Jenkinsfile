@@ -13,6 +13,8 @@ pipeline {
     environment {
         DOCKER_HUB_USERNAME = "s8kevinaf02"
         DOCKER_CREDENTIAL_ID = 's8kevinaf02-dockerhub-token'
+        SONAR_HOST_URL = 'http://your-sonarqube-server-url'  // Update this with your SonarQube server URL
+        SONAR_AUTH_TOKEN = 'your-sonarqube-auth-token'  // Update this with your SonarQube authentication token
     }
 
     parameters {
@@ -66,25 +68,6 @@ pipeline {
                 }
             }
         }
-
-        stage('SonarQube analysis') {
-            steps {
-                script {
-                    dir("${WORKSPACE}") {
-                        docker.image("s8kevinaf02/s8landscape:latest").inside('-u 0:0') {
-                            withSonarQubeEnv('SonarScanner') {
-                                sh """
-                                    ls -l 
-                                    pwd
-                                    sonar-scanner -Dsonar.projectKey=my-project-key -Dsonar.sources=.
-                                """
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Building Landscape Application') {
             when {
                 expression {
@@ -108,6 +91,19 @@ pipeline {
                     usernameVariable: 'DOCKER_USERNAME', 
                     passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    script {
+                        sh """
+                            echo "Running SonarScanner..."
+                            sonar-scanner -Dsonar.projectKey=my_project -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}
+                        """
                     }
                 }
             }
