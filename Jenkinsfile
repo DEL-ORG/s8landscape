@@ -13,8 +13,6 @@ pipeline {
     environment {
         DOCKER_HUB_USERNAME = "s8kevinaf02"
         DOCKER_CREDENTIAL_ID = 's8kevinaf02-dockerhub-token'
-        SONAR_HOST_URL = 'http://your-sonarqube-server-url'  // Update this with your SonarQube server URL
-        SONAR_AUTH_TOKEN = 'your-sonarqube-auth-token'  // Update this with your SonarQube authentication token
     }
 
     parameters {
@@ -91,19 +89,6 @@ pipeline {
                     usernameVariable: 'DOCKER_USERNAME', 
                     passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                    }
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    script {
-                        sh """
-                            echo "Running SonarScanner..."
-                            sonar-scanner -Dsonar.projectKey=my_project -Dsonar.sources=src -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}
-                        """
                     }
                 }
             }
